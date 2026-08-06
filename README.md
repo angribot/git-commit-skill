@@ -10,4 +10,6 @@ When asked to commit changes, this skill:
 - Uses English Conventional Commits messages.
 - Runs Git hooks and reports the resulting commit and any remaining changes.
 
+When asked to squash merge, the skill explicitly supplies an English Conventional Commit subject and verifies it after the merge.
+
 Unless explicitly requested, the skill does not amend commits, rebase branches, push changes, force-push, or otherwise rewrite Git history.

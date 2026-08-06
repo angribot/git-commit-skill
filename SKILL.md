@@ -1,11 +1,22 @@
 ---
 name: git-commit
-description: Commit task changes when the user requests a commit or another skill needs the commit procedure.
+description: Commit task changes when the user requests a commit or squash merge, or another skill needs this procedure.
 ---
 
 # Git Commit
 
 Commit exactly the current task's work.
+
+## Squash merge
+
+For an explicit squash-merge request:
+
+1. Inspect the final diff. Continue once every hunk belongs to the intended merge.
+2. Compose an English Conventional Commit subject. If the user requested a preview, show it and wait for confirmation.
+3. Pass the subject explicitly to the merge operation and allow it to complete.
+4. Verify that the resulting subject matches the one passed.
+
+## Direct commit
 
 1. Run `git status --short`, `git diff`, and `git diff --cached`. Continue once every changed path and hunk is accounted for as task-related or unrelated.
 2. Stage only task-related changes. Use `git add <paths>` when the whole path belongs to the task; otherwise use `git add -p`. Continue once the index contains all and only the task's changes.
