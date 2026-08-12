@@ -1,15 +1,8 @@
-# git-commit-skill
+# git-commit
 
-An AI agent skill for creating safe, focused, and consistent Git commits.
+The Git section of AGENTS.md, extracted as a skill — the rules for git operations where multiple sessions may share the working tree:
 
-When asked to commit changes, this skill:
-
-- Reviews the working tree and separates task-related changes from unrelated work.
-- Stages and commits only the files that belong to the current task.
-- Validates and reviews the staged diff before committing.
-- Uses English Conventional Commits messages.
-- Runs Git hooks and reports the resulting commit and any remaining changes.
-
-When asked to squash merge, the skill explicitly supplies an English Conventional Commit subject and verifies it after the merge.
-
-Unless explicitly requested, the skill does not amend commits, rebase branches, push changes, force-push, or otherwise rewrite Git history.
+- Commit only files YOU changed in THIS session; stage explicit paths, never `git add -A` / `git add .`.
+- Commit message format: `{feat,fix,docs}[(scope)]: <commit message>` (optionally multiple lines), informative and concise.
+- Never run `git reset --hard`, `git checkout .`, `git clean -fd`, `git stash`, `git add -A`, `git add .`, `git commit --no-verify`.
+- Rebase conflicts: resolve only files you modified; if a conflict is in a file you did not modify, abort and ask the user; never force push.

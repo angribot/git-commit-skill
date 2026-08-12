@@ -1,26 +1,26 @@
 ---
 name: git-commit
-description: Commit task changes when the user requests a commit or squash merge, or another skill needs this procedure.
+description: Git rules for safe staging, the commit message format, never-allowed commands, and rebase-conflict handling. Read before any commit, merge, or rebase.
 ---
 
-# Git Commit
+# Git
 
-Commit exactly the current task's work.
+Multiple sessions may be running in this cwd at the same time, each modifying different files. Git operations that touch unstaged, staged, or untracked files outside your own changes will stomp on other sessions' work.
 
-## Squash merge
+## Committing
 
-For an explicit squash-merge request:
+1. Run `git status` and verify you are only staging files you changed in THIS session. Continue once every changed path is accounted for as yours or unrelated to your session.
+2. Stage explicit paths (`git add <path1> <path2>`); never `git add -A` / `git add .`. Continue once the index holds all and only your session's files.
+3. Commit with the message format `{feat,fix,docs}[(scope)]: <commit message> (optionally multiple lines)` — informative and concise. Continue once the commit exists, its message matches the format, and no check was bypassed.
 
-1. Inspect the final diff. Continue once every hunk belongs to the intended merge.
-2. Compose an English Conventional Commit subject. If the user requested a preview, show it and wait for confirmation.
-3. Pass the subject explicitly to the merge operation and allow it to complete.
-4. Verify that the resulting subject matches the one passed.
+## Never run
 
-## Direct commit
+`git reset --hard`, `git checkout .`, `git clean -fd`, `git stash`, `git add -A`, `git add .`, `git commit --no-verify` — these destroy other agents' work or bypass checks. Where a positive exists, use it: stage explicit paths, commit with hooks enabled.
 
-1. Run `git status --short`, `git diff`, and `git diff --cached`. Continue once every changed path and hunk is accounted for as task-related or unrelated.
-2. Stage only task-related changes. Use `git add <paths>` when the whole path belongs to the task; otherwise use `git add -p`. Continue once the index contains all and only the task's changes.
-3. Run `git diff --cached --check` and review `git diff --cached`. Fix task-related errors. If any staged hunk belongs to unrelated work, stop and report it to the user. Continue once the check passes and every staged hunk belongs to the task.
-4. Compose an English Conventional Commit message with the header `type(scope): description` (scope optional). Phrase the description imperatively and keep the header within 72 characters.
-5. Run `git commit` and allow every hook to complete. If a hook fails or changes files, inspect the result and repeat the staging checks before retrying. Fix only task-related causes; report unrelated failures.
-6. Run `git status --short`. Report the new commit hash and subject, plus any remaining uncommitted changes.
+## Rebase conflicts
+
+If rebase conflicts occur:
+
+- Resolve conflicts only in files you modified.
+- If a conflict is in a file you did not modify, abort and ask the user.
+- Never force push.
