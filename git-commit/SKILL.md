@@ -9,19 +9,24 @@ Multiple sessions may be running in this cwd at the same time, each modifying di
 
 ## Committing
 
-1. Run `git status` and verify you are only staging files you changed in THIS session. Continue once every changed path is accounted for as yours or unrelated to your session.
-2. Stage explicit paths (`git add <path1> <path2>`); never `git add -A` / `git add .`. Continue once the index holds all and only your session's files.
-3. Commit with the Conventional Commits format `<type>[(scope)]: <commit message>` (optionally multiple lines) — informative and concise. Continue once the commit exists, its message matches the format, and no check was bypassed.
-4. Squash merges: pass an explicit subject in the same format (`gh pr merge --squash --subject "..."`). Continue once the merge used the passed subject.
+1. Run `git status` and account for every changed path before staging. In a shared worktree, leave paths belonging to other sessions untouched.
+2. Prefer explicit staging (`git add <path1> <path2>`). Before committing, inspect `git diff --cached` and ensure it contains only the intended changes.
+3. Use the Conventional Commits format `<type>[(scope)]: <commit message>` when this repository expects it. Keep the message informative and concise; keep hooks enabled.
+4. For squash merges, pass an explicit Conventional Commit subject (`gh pr merge --squash --subject "..."`).
 
-## Never run
+## Destructive or history-changing operations
 
-`git reset --hard`, `git checkout .`, `git clean -fd`, `git stash`, `git add -A`, `git add .`, `git commit --no-verify` — these destroy other agents' work or bypass checks. Where a positive exists, use it: stage explicit paths, commit with hooks enabled.
+Before discarding work, cleaning files, stashing, resetting, rebasing, or rewriting a remote branch, inspect the current state and make the scope explicit. Prefer reversible or narrow operations:
+
+- Use `git restore <path>` or `git restore --staged <path>` for targeted changes.
+- Use `git stash push -m "<description>" -- <paths>` when a stash is needed; verify its contents before dropping it.
+- Before `git clean`, run `git clean -nd` and confirm the paths. Use `-i` when the scope is uncertain.
+- Use `git reset --hard` only after confirming that all affected local work may be discarded.
+- Never bypass hooks with `git commit --no-verify`.
+- Use `--force-with-lease` only for a personal branch after rebase or another deliberate history rewrite; do not force-push shared or protected branches.
 
 ## Rebase conflicts
 
-If rebase conflicts occur:
-
-- Resolve conflicts only in files you modified.
-- If a conflict is in a file you did not modify, abort and ask the user.
-- Never force push.
+- Resolve conflicts only when you can account for the affected files and intended changes.
+- If a conflict involves work from another session or an unclear ownership boundary, stop and ask the user.
+- After resolving, inspect the diff and status before continuing.
