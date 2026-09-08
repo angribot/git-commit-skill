@@ -10,7 +10,7 @@ Multiple sessions may be running in this cwd at the same time, each modifying di
 ## Committing
 
 1. Run `git status` and account for every changed path before staging. In a shared worktree, leave paths belonging to other sessions untouched.
-2. Prefer explicit staging (`git add <path1> <path2>`). Before committing, inspect `git diff --cached` and ensure it contains only the intended changes.
+2. Prefer explicit staging (`git add <path1> <path2>`). Before committing, inspect `git diff --cached` and ensure it contains only the intended changes. If the index contains unrelated changes or ownership of changes within a file is unclear, leave those changes untouched and ask the user before proceeding.
 3. Use the Conventional Commits format `<type>[(scope)]: <commit message>` when this repository expects it. Keep the message informative and concise; keep hooks enabled.
 4. For squash merges, pass an explicit Conventional Commit subject (`gh pr merge --squash --subject "..."`).
 
