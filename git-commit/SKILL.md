@@ -1,28 +1,28 @@
 ---
 name: git-commit
-description: Git rules for safe staging, the commit message format, never-allowed commands, and rebase-conflict handling. Read before any commit, merge, or rebase.
+description: Git safety and commit conventions. Read before staging, committing, merging, rebasing, stashing, restoring, resetting, cleaning, or force-pushing.
 ---
 
 # Git
 
-Multiple sessions may be running in this cwd at the same time, each modifying different files. Git operations that touch unstaged, staged, or untracked files outside your own changes will stomp on other sessions' work.
+Multiple sessions may share this working tree and index. Preserve unrelated changes and continue within your task's scope; unrelated working-tree changes alone are not a blocker.
 
 ## Committing
 
-1. Run `git status` and account for every changed path before staging. In a shared worktree, leave paths belonging to other sessions untouched.
-2. Prefer explicit staging (`git add <path1> <path2>`). Before committing, inspect `git diff --cached` and ensure it contains only the intended changes. If the index contains unrelated changes or ownership of changes within a file is unclear, leave those changes untouched and ask the user before proceeding.
-3. Use the Conventional Commits format `<type>[(scope)]: <commit message>` when this repository expects it. Keep the message informative and concise; keep hooks enabled.
-4. For squash merges, pass an explicit Conventional Commit subject (`gh pr merge --squash --subject "..."`).
+1. Run `git status` and inspect the diff to identify the changes intended for this commit. If a file mixes your changes with unrelated edits, identify the intended hunks; ask the user only if inspection cannot establish a safe boundary.
+2. Stage explicit paths (`git add -- <paths>`) or only the intended hunks of mixed files. Before committing, inspect `git diff --cached` and ensure it contains only the intended changes. If the index contains unrelated changes, preserve them and ask the user how to coordinate the commit.
+3. Follow the repository's message convention, using `<type>[(scope)]: <commit message>` when it expects Conventional Commits. Keep hooks enabled and fix hook failures rather than bypassing them.
+4. For squash merges, pass an explicit subject following the same convention (`gh pr merge --squash --subject "..."`).
 
 ## Destructive or history-changing operations
 
 Before discarding work, cleaning files, stashing, resetting, rebasing, or rewriting a remote branch, inspect the current state and make the scope explicit. Prefer reversible or narrow operations:
 
-- Use `git restore <path>` or `git restore --staged <path>` for targeted changes.
+- To unstage your changes while preserving working-tree edits, use `git restore --staged -- <paths>`.
+- `git restore -- <paths>` discards unstaged edits. Use it only when the user has authorized discarding those edits.
 - Use `git stash push -m "<description>" -- <paths>` when a stash is needed; verify its contents before dropping it.
-- Before `git clean`, run `git clean -nd` and confirm the paths. Use `-i` when the scope is uncertain.
+- Before `git clean`, preview the exact deletion scope with `-n`, matching the planned pathspecs and filtering flags. Confirm the listed paths may be deleted; ask the user if uncertain.
 - Use `git reset --hard` only after confirming that all affected local work may be discarded.
-- Never bypass hooks with `git commit --no-verify`.
 - Use `--force-with-lease` only for a personal branch after rebase or another deliberate history rewrite; do not force-push shared or protected branches.
 
 ## Rebase conflicts
