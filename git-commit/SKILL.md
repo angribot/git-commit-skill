@@ -1,32 +1,34 @@
 ---
 name: git-commit
-description: Git safety and commit conventions. Read before staging, committing, merging, rebasing, stashing, restoring, resetting, cleaning, or force-pushing.
+description: Git safety and commit conventions. Read before staging, committing, merging, rebasing, stashing, restoring, cleaning, resetting, or force-pushing.
 ---
 
 # Git
 
-Multiple sessions may share this working tree and index. Preserve unrelated changes and continue within your task's scope; unrelated working-tree changes alone are not a blocker.
+Several sessions may share this working tree and index, so the diff carries **orphans**: changed paths, hunks, and index entries that belong to other tasks. Leave orphans in place and stay inside your task's scope.
 
 ## Committing
 
-1. Run `git status` and inspect the diff to identify the changes intended for this commit. If a file mixes your changes with unrelated edits, identify the intended hunks; ask the user only if inspection cannot establish a safe boundary.
-2. Stage explicit paths (`git add -- <paths>`) or only the intended hunks of mixed files. Before committing, inspect `git diff --cached` and ensure it contains only the intended changes. If the index contains unrelated changes, preserve them and ask the user how to coordinate the commit.
-3. Follow the repository's message convention, using `<type>[(scope)]: <commit message>` when it expects Conventional Commits. Keep hooks enabled and fix hook failures rather than bypassing them.
-4. For squash merges, pass an explicit subject following the same convention (`gh pr merge --squash --subject "..."`).
+Done when the commit exists, the index holds nothing but this task's changes, and no hook was bypassed.
 
-## Destructive or history-changing operations
+1. Stage explicit paths (`git add -- <paths>`), or for a mixed file stage only its intended hunks.
+2. Inspect `git diff --cached`. When an orphan is staged, unstage it, keep the work, and ask the user before committing, naming the paths involved so they can sequence the commits.
+3. Write the subject as `<type>[(scope)]: <subject>`, and pass that same subject explicitly to a squash merge (`gh pr merge --squash --subject "..."`).
+4. Keep hooks enabled; a hook that fails or modifies files means fixing the cause and running the staging inspection again.
 
-Before discarding work, cleaning files, stashing, resetting, rebasing, or rewriting a remote branch, inspect the current state and make the scope explicit. Prefer reversible or narrow operations:
+## History-changing commands
 
-- To unstage your changes while preserving working-tree edits, use `git restore --staged -- <paths>`.
-- `git restore -- <paths>` discards unstaged edits. Use it only when the user has authorized discarding those edits.
-- Use `git stash push -m "<description>" -- <paths>` when a stash is needed; verify its contents before dropping it.
-- Before `git clean`, preview the exact deletion scope with `-n`, matching the planned pathspecs and filtering flags. Confirm the listed paths may be deleted; ask the user if uncertain.
-- Use `git reset --hard` only after confirming that all affected local work may be discarded.
-- Use `--force-with-lease` only for a personal branch after rebase or another deliberate history rewrite; do not force-push shared or protected branches.
+Two similar commands sit one keystroke apart here, and the wrong one destroys work. Each row pairs the command that keeps the work recoverable with the one that discards it; the right column needs the user's authorization for the specific work it destroys.
+
+| Safe form | Destructive form |
+|---|---|
+| `git restore --staged -- <paths>` — unstages, keeps the edits | `git restore -- <paths>` — discards unstaged edits |
+| `git stash push -m "<why>" -- <paths>` — purpose message, path scope | bare `git stash` — wide and anonymous |
+| `git clean -n` with the planned pathspecs and filters — this list is the true deletion scope | `git clean -f` |
+| `--force-with-lease` after a deliberate rewrite of a branch you own | `--force` on a shared or protected branch |
+
+`git reset --hard` is the one command here with no safe form: it discards every path it touches, so it waits until you have confirmed each affected path is disposable.
 
 ## Rebase conflicts
 
-- Resolve conflicts only when you can account for the affected files and intended changes.
-- If a conflict involves work from another session or an unclear ownership boundary, stop and ask the user.
-- After resolving, inspect the diff and status before continuing.
+Resolve a conflict when every affected file is one this task touched. When a conflict carries another session's work, stop and ask the user.
